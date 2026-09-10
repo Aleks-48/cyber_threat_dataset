@@ -1,0 +1,7 @@
+random_seed: 42
+quotas:
+  min_candidates_per_subtype: 1500
+  manual_sample_size: 100
+thresholds:
+  target_threat_rate_min: 0.70
+  uncertain_rate_max: 0.15

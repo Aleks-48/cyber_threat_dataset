@@ -1,0 +1,5 @@
+pandas
+pyyaml
+pytest
+pydantic
+streamlit
