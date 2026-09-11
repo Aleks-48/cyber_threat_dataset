@@ -1,42 +1,6 @@
 source_id,source_name,platform,url,description,review_status,review_comment
-SRC_000001,Channel 1,Telegram,https://t.me/channel_1,Desc,APPROVED,OK
-SRC_000002,Channel 2,Telegram,https://t.me/channel_2,Desc,APPROVED,OK
-SRC_000003,Channel 3,Telegram,https://t.me/channel_3,Desc,APPROVED,OK
-SRC_000004,Channel 4,Telegram,https://t.me/channel_4,Desc,APPROVED,OK
-SRC_000005,Channel 5,Telegram,https://t.me/channel_5,Desc,APPROVED,OK
-SRC_000006,Channel 6,Telegram,https://t.me/channel_6,Desc,APPROVED,OK
-SRC_000007,Channel 7,Telegram,https://t.me/channel_7,Desc,APPROVED,OK
-SRC_000008,Channel 8,Telegram,https://t.me/channel_8,Desc,APPROVED,OK
-SRC_000009,Channel 9,Telegram,https://t.me/channel_9,Desc,APPROVED,OK
-SRC_000010,Channel 10,Telegram,https://t.me/channel_10,Desc,APPROVED,OK
-SRC_000011,Channel 11,Telegram,https://t.me/channel_11,Desc,APPROVED,OK
-SRC_000012,Channel 12,Telegram,https://t.me/channel_12,Desc,APPROVED,OK
-SRC_000013,Channel 13,Telegram,https://t.me/channel_13,Desc,APPROVED,OK
-SRC_000014,Channel 14,Telegram,https://t.me/channel_14,Desc,APPROVED,OK
-SRC_000015,Channel 15,Telegram,https://t.me/channel_15,Desc,APPROVED,OK
-SRC_000016,Channel 16,Telegram,https://t.me/channel_16,Desc,APPROVED,OK
-SRC_000017,Channel 17,Telegram,https://t.me/channel_17,Desc,APPROVED,OK
-SRC_000018,Channel 18,Telegram,https://t.me/channel_18,Desc,APPROVED,OK
-SRC_000019,Channel 19,Telegram,https://t.me/channel_19,Desc,APPROVED,OK
-SRC_000020,Channel 20,Telegram,https://t.me/channel_20,Desc,APPROVED,OK
-SRC_000021,Channel 21,Telegram,https://t.me/channel_21,Desc,APPROVED,OK
-SRC_000022,Channel 22,Telegram,https://t.me/channel_22,Desc,APPROVED,OK
-SRC_000023,Channel 23,Telegram,https://t.me/channel_23,Desc,APPROVED,OK
-SRC_000024,Channel 24,Telegram,https://t.me/channel_24,Desc,APPROVED,OK
-SRC_000025,Channel 25,Telegram,https://t.me/channel_25,Desc,APPROVED,OK
-SRC_000026,Channel 26,Telegram,https://t.me/channel_26,Desc,APPROVED,OK
-SRC_000027,Channel 27,Telegram,https://t.me/channel_27,Desc,APPROVED,OK
-SRC_000028,Channel 28,Telegram,https://t.me/channel_28,Desc,APPROVED,OK
-SRC_000029,Channel 29,Telegram,https://t.me/channel_29,Desc,APPROVED,OK
-SRC_000030,Channel 30,Telegram,https://t.me/channel_30,Desc,APPROVED,OK
-SRC_000031,Channel 31,Telegram,https://t.me/channel_31,Desc,APPROVED,OK
-SRC_000032,Channel 32,Telegram,https://t.me/channel_32,Desc,APPROVED,OK
-SRC_000033,Channel 33,Telegram,https://t.me/channel_33,Desc,APPROVED,OK
-SRC_000034,Channel 34,Telegram,https://t.me/channel_34,Desc,APPROVED,OK
-SRC_000035,Channel 35,Telegram,https://t.me/channel_35,Desc,APPROVED,OK
-SRC_000036,Channel 36,Telegram,https://t.me/channel_36,Desc,APPROVED,OK
-SRC_000037,Channel 37,Telegram,https://t.me/channel_37,Desc,APPROVED,OK
-SRC_000038,Channel 38,Telegram,https://t.me/channel_38,Desc,APPROVED,OK
-SRC_000039,Channel 39,Telegram,https://t.me/channel_39,Desc,APPROVED,OK
-SRC_000040,Channel 40,Telegram,https://t.me/channel_40,Desc,APPROVED,OK
-SRC_000041,Channel 41,Telegram,https://t.me/channel_41,Desc,APPROVED,OK
+SRC_000001,Топор Live,Telegram,https://t.me/topor_live,Новостной канал,APPROVED,OK
+SRC_000002,Двач,Telegram,https://t.me/dvachannel,Развлекательный канал,APPROVED,OK
+SRC_000003,Mash,Telegram,https://t.me/breakingmash,Новости,APPROVED,OK
+SRC_000004,Qumash,Telegram,https://t.me/qumash_kz,Новости КЗ,APPROVED,OK
+SRC_000005,Подслушано,VK,https://vk.com/overhear,Открытый паблик,APPROVED,OK
