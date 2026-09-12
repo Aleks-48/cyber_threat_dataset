@@ -17,7 +17,6 @@ st.markdown("Продвинутый дашборд аналитики и упр�
 page = st.sidebar.radio("Навигация", ["📊 Дашборд и Аналитика", "🤖 Сравнение ML-моделей", "📁 Обозреватель данных", "⚙️ Статус и Аудит"])
 
 # Вспомогательная функция для чтения данных
-@st.cache_data
 def load_data(filename):
     path = os.path.join(ROOT_DIR, filename)
     if os.path.exists(path):
@@ -94,7 +93,7 @@ elif page == "🤖 Сравнение ML-моделей":
     if not metrics_df.empty:
         st.subheader("Лидерборд Моделей")
         st.dataframe(
-            metrics_df.style.background_gradient(cmap="Greens", subset=["F1-Score", "Accuracy"]),
+            metrics_df,
             use_container_width=True
         )
         

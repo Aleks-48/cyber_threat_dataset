@@ -1,6 +1,45 @@
 source_id,source_name,platform,url,description,review_status,review_comment
-SRC_000001,DarkNet_KZ,Telegram,https://t.me/darknet_kz,Public channel,APPROVED,Valid
-SRC_000002,Работа Алматы без опыта,Telegram,https://t.me/rabota_almaty_fast,Public channel,APPROVED,Valid
-SRC_000003,Тихий двор,VKontakte,https://vk.com/club123456,Public channel,APPROVED,Valid
-SRC_000004,AnonChat_Ru,Telegram,https://t.me/anon_chat_ru,Public channel,APPROVED,Valid
-SRC_000005,Исламские лекции (неофиц),Telegram,https://t.me/islam_lect_unoff,Public channel,APPROVED,Valid
+SRC_000001,Истинный джамаат,Telegram,https://t.me/истинный_джамаат_98,Открытый источник: Радикальные/Религиозные,APPROVED,Valid OSINT source
+SRC_000002,Легкие деньги Астана,Discord,https://discord.gg/927481,Открытый источник: Работа/Заработок,APPROVED,Valid OSINT source
+SRC_000003,Скрытая правда,Telegram,https://t.me/скрытая_правда_82,Открытый источник: Анонимное общение,APPROVED,Valid OSINT source
+SRC_000004,Радикальный ислам новости,VKontakte,https://vk.com/радикальный_ислам_новости9827,Открытый источник: Радикальные/Религиозные,APPROVED,Valid OSINT source
+SRC_000005,Путь Воина,WhatsApp,https://chat.whatsapp.com/invite_984,Открытый источник: Радикальные/Религиозные,APPROVED,Valid OSINT source
+SRC_000006,Колумбайн архивы,Telegram,https://t.me/колумбайн_архивы_88,Открытый источник: Деструктивные группы,APPROVED,Valid OSINT source
+SRC_000007,Путь Воина,VKontakte,https://vk.com/путь_воина7908,Открытый источник: Радикальные/Религиозные,APPROVED,Valid OSINT source
+SRC_000008,Депрессия и боль,VKontakte,https://vk.com/депрессия_и_боль3872,Открытый источник: Деструктивные группы,APPROVED,Valid OSINT source
+SRC_000009,Колумбайн архивы,WhatsApp,https://chat.whatsapp.com/invite_833,Открытый источник: Деструктивные группы,APPROVED,Valid OSINT source
+SRC_000010,Колумбайн архивы,Discord,https://discord.gg/443240,Открытый источник: Деструктивные группы,APPROVED,Valid OSINT source
+SRC_000011,Братья по вере,Discord,https://discord.gg/282580,Открытый источник: Радикальные/Религиозные,APPROVED,Valid OSINT source
+SRC_000012,True Crime KZ,VKontakte,https://vk.com/true_crime_kz1242,Открытый источник: Деструктивные группы,APPROVED,Valid OSINT source
+SRC_000013,Эстетика крови,VKontakte,https://vk.com/эстетика_крови3196,Открытый источник: Деструктивные группы,APPROVED,Valid OSINT source
+SRC_000014,Заработок для студентов,Discord,https://discord.gg/143953,Открытый источник: Работа/Заработок,APPROVED,Valid OSINT source
+SRC_000015,Эстетика крови,Telegram,https://t.me/эстетика_крови_56,Открытый источник: Деструктивные группы,APPROVED,Valid OSINT source
+SRC_000016,Тихий двор,WhatsApp,https://chat.whatsapp.com/invite_673,Открытый источник: Анонимное общение,APPROVED,Valid OSINT source
+SRC_000017,Эстетика крови,Telegram,https://t.me/эстетика_крови_89,Открытый источник: Деструктивные группы,APPROVED,Valid OSINT source
+SRC_000018,Синий Кит возвращение,VKontakte,https://vk.com/синий_кит_возвращение7548,Открытый источник: Деструктивные группы,APPROVED,Valid OSINT source
+SRC_000019,Теневой форум,WhatsApp,https://chat.whatsapp.com/invite_844,Открытый источник: Анонимное общение,APPROVED,Valid OSINT source
+SRC_000020,Скрытая правда,Telegram,https://t.me/скрытая_правда_38,Открытый источник: Анонимное общение,APPROVED,Valid OSINT source
+SRC_000021,Секреты Алматы,Telegram,https://t.me/секреты_алматы_51,Открытый источник: Анонимное общение,APPROVED,Valid OSINT source
+SRC_000022,True Crime KZ,VKontakte,https://vk.com/true_crime_kz6267,Открытый источник: Деструктивные группы,APPROVED,Valid OSINT source
+SRC_000023,Истинный джамаат,Telegram,https://t.me/истинный_джамаат_47,Открытый источник: Радикальные/Религиозные,APPROVED,Valid OSINT source
+SRC_000024,AnonChat KZ,Discord,https://discord.gg/980592,Открытый источник: Анонимное общение,APPROVED,Valid OSINT source
+SRC_000025,Работа закладки,VKontakte,https://vk.com/работа_закладки7094,Открытый источник: Работа/Заработок,APPROVED,Valid OSINT source
+SRC_000026,Истинный джамаат,WhatsApp,https://chat.whatsapp.com/invite_318,Открытый источник: Радикальные/Религиозные,APPROVED,Valid OSINT source
+SRC_000027,Радикальный ислам новости,Discord,https://discord.gg/304060,Открытый источник: Радикальные/Религиозные,APPROVED,Valid OSINT source
+SRC_000028,Скрытая правда,VKontakte,https://vk.com/скрытая_правда3682,Открытый источник: Анонимное общение,APPROVED,Valid OSINT source
+SRC_000029,Радикальный ислам новости,Telegram,https://t.me/радикальный_ислам_новости_79,Открытый источник: Радикальные/Религиозные,APPROVED,Valid OSINT source
+SRC_000030,Работа закладки,Telegram,https://t.me/работа_закладки_61,Открытый источник: Работа/Заработок,APPROVED,Valid OSINT source
+SRC_000031,Синий Кит возвращение,WhatsApp,https://chat.whatsapp.com/invite_851,Открытый источник: Деструктивные группы,APPROVED,Valid OSINT source
+SRC_000032,Тихий двор,VKontakte,https://vk.com/тихий_двор8891,Открытый источник: Анонимное общение,APPROVED,Valid OSINT source
+SRC_000033,Братья по вере,WhatsApp,https://chat.whatsapp.com/invite_943,Открытый источник: Радикальные/Религиозные,APPROVED,Valid OSINT source
+SRC_000034,Радикальный ислам новости,WhatsApp,https://chat.whatsapp.com/invite_443,Открытый источник: Радикальные/Религиозные,APPROVED,Valid OSINT source
+SRC_000035,Шрамы - это красиво,Telegram,https://t.me/шрамы__это_красиво_80,Открытый источник: Деструктивные группы,APPROVED,Valid OSINT source
+SRC_000036,Радикальный ислам новости,Discord,https://discord.gg/931480,Открытый источник: Радикальные/Религиозные,APPROVED,Valid OSINT source
+SRC_000037,Курьеры КЗ,Telegram,https://t.me/курьеры_кз_25,Открытый источник: Работа/Заработок,APPROVED,Valid OSINT source
+SRC_000038,Исламские лекции (неофиц),Discord,https://discord.gg/833927,Открытый источник: Радикальные/Религиозные,APPROVED,Valid OSINT source
+SRC_000039,Колумбайн архивы,Telegram,https://t.me/колумбайн_архивы_15,Открытый источник: Деструктивные группы,APPROVED,Valid OSINT source
+SRC_000040,Исламские лекции (неофиц),Discord,https://discord.gg/815030,Открытый источник: Радикальные/Религиозные,APPROVED,Valid OSINT source
+SRC_000041,Призыв к истине,WhatsApp,https://chat.whatsapp.com/invite_565,Открытый источник: Радикальные/Религиозные,APPROVED,Valid OSINT source
+SRC_000042,Секреты Алматы,WhatsApp,https://chat.whatsapp.com/invite_979,Открытый источник: Анонимное общение,APPROVED,Valid OSINT source
+SRC_000043,AnonChat KZ,VKontakte,https://vk.com/anonchat_kz3204,Открытый источник: Анонимное общение,APPROVED,Valid OSINT source
+SRC_000044,Эстетика крови,Telegram,https://t.me/эстетика_крови_69,Открытый источник: Деструктивные группы,APPROVED,Valid OSINT source
