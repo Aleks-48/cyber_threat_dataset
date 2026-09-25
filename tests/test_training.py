@@ -1,5 +1,9 @@
 from audit import read_csv
-from train_models import export_enriched_candidates, labeled_unique_texts
+from train_models import (
+    export_enriched_candidates,
+    labeled_unique_texts,
+    train_inference_models,
+)
 
 
 def test_training_uses_distinct_decisively_labeled_texts():
@@ -23,3 +27,10 @@ def test_enriched_export_keeps_all_candidates_and_source_names():
     assert all(row["source_name"] for row in rows)
     assert all(row["platform"] for row in rows)
     assert all(row["source_registry_status"] == "DECLARED_OSINT" for row in rows)
+
+
+def test_streamlit_can_train_and_run_all_five_models():
+    models = train_inference_models()
+    assert len(models) == 5
+    for pipeline in models.values():
+        assert int(pipeline.predict(["Проверочный текст"])[0]) in {0, 1}

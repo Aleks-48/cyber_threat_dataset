@@ -1,5 +1,6 @@
 """Read-only dashboard for the checked-in dataset and its audit."""
 import json
+import math
 import subprocess
 import sys
 from pathlib import Path
@@ -9,6 +10,7 @@ import plotly.express as px
 import streamlit as st
 
 from audit import ROOT, audit
+from train_models import MODEL_CHARACTERISTICS, train_inference_models
 
 st.set_page_config(page_title="Cyber Threat Dataset", layout="wide")
 st.title("Cyber Threat Dataset — Theme 8")
@@ -18,6 +20,23 @@ st.caption("Research snapshot. Review the audit before interpreting model scores
 @st.cache_data
 def load_csv(relative_path):
     return pd.read_csv(ROOT / relative_path)
+
+
+@st.cache_resource(show_spinner="Обучение пяти демонстрационных моделей…")
+def load_inference_models():
+    return train_inference_models()
+
+
+def prediction_strength(pipeline, text):
+    """Return a comparable 0..100 model score where available."""
+    estimator = pipeline.steps[-1][1]
+    transformed = pipeline[:-1].transform([text])
+    if hasattr(estimator, "predict_proba"):
+        return float(estimator.predict_proba(transformed)[0][1] * 100), "вероятность"
+    if hasattr(estimator, "decision_function"):
+        margin = float(estimator.decision_function(transformed)[0])
+        return 100 / (1 + math.exp(-margin)), "нормализованный отступ"
+    return None, "нет оценки"
 
 
 page = st.sidebar.radio(
@@ -59,6 +78,19 @@ if page == "Данные":
     st.caption(
         "DECLARED_OSINT означает, что источник внесён в реестр проекта; "
         "доступность URL и происхождение текста требуют отдельной проверки."
+    )
+    full_dataset_path = ROOT / "06_candidates/candidates_with_sources.csv"
+    st.download_button(
+        "⬇️ Скачать весь датасет — 13 500 строк (CSV)",
+        data=full_dataset_path.read_bytes(),
+        file_name="cyber_threat_dataset_13500_with_sources.csv",
+        mime="text/csv",
+        help="Скачивается полный файл, выбранный ниже фильтр на него не влияет.",
+        type="primary",
+    )
+    st.caption(
+        f"Размер файла: {full_dataset_path.stat().st_size / (1024 * 1024):.1f} МБ. "
+        "В выгрузку входят тексты, подвиды, языки, названия каналов, платформы и URL."
     )
     st.dataframe(enriched.head(1000), width="stretch")
 
@@ -112,3 +144,48 @@ else:
             "Метрики получены на отложенных уникальных текстах из текущего снимка; "
             "они не измеряют качество на реальных новых источниках."
         )
+        st.divider()
+        st.subheader("Проверить текст пятью моделями")
+        st.caption(
+            "Каждая модель выдаёт бинарный демонстрационный прогноз: "
+            "TARGET_THREAT или OTHER/NORMAL. Результат не является экспертным решением."
+        )
+        text_to_check = st.text_area(
+            "Текст для анализа",
+            height=140,
+            placeholder="Введите сообщение на русском или казахском языке…",
+        )
+        if st.button("Проанализировать всеми моделями", type="primary"):
+            if not text_to_check.strip():
+                st.warning("Введите непустой текст.")
+            else:
+                with st.spinner("Модели анализируют текст…"):
+                    models = load_inference_models()
+                    rows = []
+                    ranks = dict(zip(scores["Model"], scores["Rank"]))
+                    for name, pipeline in models.items():
+                        prediction = int(pipeline.predict([text_to_check.strip()])[0])
+                        strength, score_type = prediction_strength(
+                            pipeline, text_to_check.strip()
+                        )
+                        characteristic, best_for, limitation = MODEL_CHARACTERISTICS[name]
+                        rows.append({
+                            "Место": int(ranks.get(name, 999)),
+                            "Модель": name,
+                            "Прогноз": "TARGET_THREAT" if prediction else "OTHER/NORMAL",
+                            "Оценка, %": round(strength, 1) if strength is not None else None,
+                            "Тип оценки": score_type,
+                            "Характеристика": characteristic,
+                            "Ограничение": limitation,
+                        })
+                result_frame = pd.DataFrame(rows).sort_values("Место")
+                threat_votes = int((result_frame["Прогноз"] == "TARGET_THREAT").sum())
+                if threat_votes >= 3:
+                    st.error(f"TARGET_THREAT: {threat_votes} из 5 моделей")
+                else:
+                    st.success(f"OTHER/NORMAL: {5 - threat_votes} из 5 моделей")
+                st.dataframe(result_frame, width="stretch", hide_index=True)
+                st.caption(
+                    "Процент SVM является преобразованным расстоянием до границы, "
+                    "а не калиброванной вероятностью."
+                )

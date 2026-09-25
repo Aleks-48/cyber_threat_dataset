@@ -53,6 +53,38 @@ MODEL_CHARACTERISTICS = {
 }
 
 
+def model_estimators():
+    """Return fresh instances of all five baseline estimators."""
+    return {
+        "Logistic Regression": LogisticRegression(max_iter=1000, random_state=SEED),
+        "Naive Bayes": MultinomialNB(),
+        "Support Vector Machine (SVM)": LinearSVC(random_state=SEED),
+        "Random Forest": RandomForestClassifier(n_estimators=100, random_state=SEED),
+        "Neural Network (MLP)": MLPClassifier(
+            hidden_layer_sizes=(32,), max_iter=300, random_state=SEED
+        ),
+    }
+
+
+def train_inference_models():
+    """Fit all baselines on every distinct decisively labelled example.
+
+    This is used by the Streamlit demo for interactive predictions. Evaluation
+    continues to use a separate holdout split in ``train_and_evaluate``.
+    """
+    rows = labeled_unique_texts()
+    texts = [text for text, _ in rows]
+    labels = [label for _, label in rows]
+    fitted = {}
+    for name, estimator in model_estimators().items():
+        pipeline = make_pipeline(
+            TfidfVectorizer(max_features=1000, ngram_range=(1, 2)), estimator
+        )
+        pipeline.fit(texts, labels)
+        fitted[name] = pipeline
+    return fitted
+
+
 def export_enriched_candidates():
     """Join all 13,500 candidates to their declared open-source registry rows."""
     candidates = read_csv("06_candidates/candidates.csv")
@@ -108,15 +140,7 @@ def train_and_evaluate():
         texts, labels, test_size=0.2, random_state=SEED, stratify=labels
     )
     assert not set(train_text) & set(test_text)
-    models = {
-        "Logistic Regression": LogisticRegression(max_iter=1000, random_state=SEED),
-        "Naive Bayes": MultinomialNB(),
-        "Support Vector Machine (SVM)": LinearSVC(random_state=SEED),
-        "Random Forest": RandomForestClassifier(n_estimators=100, random_state=SEED),
-        "Neural Network (MLP)": MLPClassifier(
-            hidden_layer_sizes=(32,), max_iter=300, random_state=SEED
-        ),
-    }
+    models = model_estimators()
     results = []
     for name, estimator in models.items():
         pipeline = make_pipeline(
