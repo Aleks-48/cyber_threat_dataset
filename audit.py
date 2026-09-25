@@ -44,6 +44,11 @@ def audit():
     annotations = read_csv("07_manual_100/manual_annotations.csv")
     keywords = read_csv("01_keywords/keywords_approved.csv")
     sources = read_csv("02_sources/sources_approved.csv")
+    enriched_path = ROOT / "06_candidates/candidates_with_sources.csv"
+    enriched = (
+        read_csv("06_candidates/candidates_with_sources.csv")
+        if enriched_path.exists() else []
+    )
     reasons = []
 
     def check(ok, reason):
@@ -62,6 +67,14 @@ def audit():
     check(set(sample_ids) == set(annotation_ids), "Sample and annotations differ")
     check(all(r["source_id"] in source_ids for r in candidates),
           "Candidates reference unapproved sources")
+    check(len(enriched) == len(candidates),
+          "Enriched candidate export is missing or incomplete")
+    if enriched:
+        check(
+            all(r["source_name"] and r["platform"] and r["source_url"]
+                for r in enriched),
+            "Enriched candidate export has missing source metadata",
+        )
     check(all(r["annotation"] in LABELS for r in annotations), "Unknown annotations")
     check(all(r["dialogue_id"] in by_id and
               r["target_subtype"] == by_id[r["dialogue_id"]]["target_subtype"]
@@ -129,6 +142,7 @@ def audit():
         "approved_keywords": len(approved_keywords),
         "approved_sources": len(source_ids),
         "candidate_count": len(candidates),
+        "enriched_candidate_count": len(enriched),
         "candidate_counts_by_subtype": dict(subtype_counts),
         "unique_text_count": unique_texts,
         "unique_texts_by_subtype": unique_by_subtype,

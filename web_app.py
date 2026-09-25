@@ -30,6 +30,7 @@ if not report["next_stage_allowed"]:
 
 if page == "Данные":
     candidates = load_csv("06_candidates/candidates.csv")
+    enriched = load_csv("06_candidates/candidates_with_sources.csv")
     annotations = load_csv("07_manual_100/manual_annotations.csv")
     a, b, c, d = st.columns(4)
     a.metric("Записей", report["candidate_count"])
@@ -53,8 +54,13 @@ if page == "Данные":
     st.caption("Частоты относятся к строкам файла, а не к независимым диалогам.")
     subtype = st.selectbox("Подвид", ["Все"] + sorted(candidates["target_subtype"].unique()))
     if subtype != "Все":
-        candidates = candidates[candidates["target_subtype"] == subtype]
-    st.dataframe(candidates.head(1000), width="stretch")
+        enriched = enriched[enriched["target_subtype"] == subtype]
+    st.subheader("Записи с наименованием открытого источника")
+    st.caption(
+        "DECLARED_OSINT означает, что источник внесён в реестр проекта; "
+        "доступность URL и происхождение текста требуют отдельной проверки."
+    )
+    st.dataframe(enriched.head(1000), width="stretch")
 
 elif page == "Качество и аудит":
     if st.button("Пересчитать и сохранить аудит"):
@@ -80,6 +86,7 @@ else:
     else:
         metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
         scores = pd.read_csv(scores_path)
+        scores = scores.sort_values("Rank")
         st.info(
             f"Статус: {metadata['dataset_status']}. "
             f"Обучающих уникальных текстов: {metadata['training_texts']}; "
@@ -87,7 +94,16 @@ else:
         )
         st.dataframe(scores, width="stretch")
         st.plotly_chart(
-            px.bar(scores, x="Model", y="F1-Score", text="F1-Score"),
+            px.bar(
+                scores,
+                x="Model",
+                y="F1-Score",
+                text="F1-Score",
+                hover_data=[
+                    "Rank", "Characteristic", "Best-For", "Limitation",
+                    "Predict-ms-per-1000",
+                ],
+            ),
             width="stretch",
         )
         st.caption(

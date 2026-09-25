@@ -6,6 +6,10 @@
   "test_texts": 34,
   "random_seed": 42,
   "split": "Stratified holdout after exact-text deduplication",
+  "ranking_basis": "F1, Accuracy, Recall, prediction speed, training speed",
+  "enriched_candidate_file": "06_candidates\\candidates_with_sources.csv",
+  "enriched_candidate_count": 13500,
+  "source_registry_note": "Channel names and URLs come from sources_approved.csv. DECLARED_OSINT means listed as open, not independently verified.",
   "blocking_reasons": [
     "Too few unique texts: EXTREMIST_PROPAGANDA",
     "Too few unique texts: EXTREMIST_RECRUITMENT",

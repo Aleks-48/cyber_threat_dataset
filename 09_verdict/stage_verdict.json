@@ -2,6 +2,7 @@
   "approved_keywords": 33,
   "approved_sources": 44,
   "candidate_count": 13500,
+  "enriched_candidate_count": 13500,
   "candidate_counts_by_subtype": {
     "EXTREMIST_PROPAGANDA": 1500,
     "EXTREMIST_RECRUITMENT": 1500,

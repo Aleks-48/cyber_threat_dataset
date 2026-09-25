@@ -1,5 +1,5 @@
 from audit import read_csv
-from train_models import labeled_unique_texts
+from train_models import export_enriched_candidates, labeled_unique_texts
 
 
 def test_training_uses_distinct_decisively_labeled_texts():
@@ -13,3 +13,13 @@ def test_training_uses_distinct_decisively_labeled_texts():
         if row["annotation"] == "UNCERTAIN"
     }
     assert not set(texts) & uncertain
+
+
+def test_enriched_export_keeps_all_candidates_and_source_names():
+    path, count = export_enriched_candidates()
+    rows = read_csv(str(path.relative_to(path.parent.parent)))
+    assert count == 13500
+    assert len(rows) == 13500
+    assert all(row["source_name"] for row in rows)
+    assert all(row["platform"] for row in rows)
+    assert all(row["source_registry_status"] == "DECLARED_OSINT" for row in rows)
