@@ -1,15 +1,21 @@
-import os
-import subprocess
+"""Run the audit, then exploratory model evaluation when dependencies are present."""
+import json
+from audit import audit, save_report
 
-stages = [
-    "01_keywords", "02_sources", "03_collection", "04_raw_data",
-    "05_cleaning", "06_candidates", "07_manual_100", "08_quality_analysis", "09_verdict"
-]
 
-for stage in stages:
-    print(f"\n{'='*50}\nRunning {stage}...\n{'='*50}")
-    run_script = os.path.join(stage, "run.py")
-    if os.path.exists(run_script):
-        subprocess.run(["python", "run.py"], cwd=stage)
-    else:
-        print(f"No run.py found in {stage}")
+def main():
+    report = audit()
+    save_report(report)
+    print(json.dumps(report, ensure_ascii=False, indent=2))
+    if not report["next_stage_allowed"]:
+        print("Quality gate blocked. Model scores, if calculated, are demo-only.")
+        return 1
+    from train_models import train_and_evaluate
+    results, metadata = train_and_evaluate()
+    print(json.dumps({"results": results, "metadata": metadata},
+                     ensure_ascii=False, indent=2))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

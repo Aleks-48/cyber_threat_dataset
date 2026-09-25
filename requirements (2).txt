@@ -1,0 +1,7 @@
+pandas
+pyyaml
+pytest
+pydantic
+streamlit
+plotly
+scikit-learn

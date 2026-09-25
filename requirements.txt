@@ -1,6 +1,0 @@
-pandas
-pyyaml
-pytest
-pydantic
-streamlit
-plotly

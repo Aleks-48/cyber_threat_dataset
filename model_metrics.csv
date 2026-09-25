@@ -1,0 +1,6 @@
+Model,Accuracy,Precision,Recall,F1-Score
+Logistic Regression,100.0,100.0,100.0,100.0
+Naive Bayes,100.0,100.0,100.0,100.0
+Support Vector Machine (SVM),100.0,100.0,100.0,100.0
+Random Forest,100.0,100.0,100.0,100.0
+Neural Network (MLP),100.0,100.0,100.0,100.0
