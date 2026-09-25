@@ -1,51 +1,49 @@
-import os
+import csv
 import hashlib
 import json
 import subprocess
-import pytest
+import sys
+from pathlib import Path
 
-ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from audit import ROOT, audit, config
 
-def test_sample_reproducibility():
-    sample_path = os.path.join(ROOT_DIR, "07_manual_100", "manual_sample_100.csv")
-    script_path = os.path.join(ROOT_DIR, "07_manual_100", "create_sample.py")
-    
-    # get initial hash
-    with open(sample_path, "rb") as f:
-        initial_hash = hashlib.sha256(f.read()).hexdigest()
-        
-    # run script
-    subprocess.run(["python", script_path, "--seed", "42"], check=True)
-    
-    # check hash again
-    with open(sample_path, "rb") as f:
-        new_hash = hashlib.sha256(f.read()).hexdigest()
-        
-    assert initial_hash == new_hash, "Hash mismatch after running create_sample.py with seed 42"
 
-def test_raw_data_hash_unaltered():
-    raw_path = os.path.join(ROOT_DIR, "04_raw_data", "raw_harvest_snapshot.jsonl")
-    protocol_path = os.path.join(ROOT_DIR, "03_collection", "collection_protocol.json")
-    
-    with open(protocol_path, "r", encoding="utf-8") as f:
-        protocol = json.load(f)
-        
-    with open(raw_path, "rb") as f:
-        raw_hash = hashlib.sha256(f.read()).hexdigest()
-        
-    assert raw_hash == protocol["raw_data_hash"], "Raw data hash altered!"
+def test_sample_reproducibility_without_overwriting_annotations(tmp_path):
+    script = ROOT / "07_manual_100/create_sample.py"
+    checked_in = ROOT / "07_manual_100/manual_sample_100.csv"
+    before = hashlib.sha256(checked_in.read_bytes()).digest()
+    first, second = tmp_path / "first.csv", tmp_path / "second.csv"
+    for output in (first, second):
+        subprocess.run(
+            [sys.executable, str(script), "--seed", "42", "--output", str(output)],
+            check=True,
+        )
+    assert first.read_bytes() == second.read_bytes()
+    assert hashlib.sha256(checked_in.read_bytes()).digest() == before
 
-def test_stage_verdict_logic():
-    verdict_path = os.path.join(ROOT_DIR, "09_verdict", "stage_verdict.json")
-    with open(verdict_path, "r", encoding="utf-8") as f:
-        verdict = json.load(f)
-        
-    # the spec says it should block if target_threat_rate < 0.70 or candidates < 1500 per subtype.
-    # We just test the current state of stage_verdict.json logic.
-    # Since we can't easily rewrite the logic in a test, the test verifies that if blocking reasons exist, next_stage_allowed is false.
-    # And if TARGET_THREAT_RATE < 0.70, it must be false. (We'll assume the audit output and run.py enforce this).
-    
-    if verdict.get("blocking_reasons"):
-        assert not verdict["next_stage_allowed"]
-    else:
-        assert verdict["next_stage_allowed"]
+
+def test_raw_data_hash_matches_recorded_snapshot():
+    protocol = json.loads(
+        (ROOT / "03_collection/collection_protocol.json").read_text(encoding="utf-8")
+    )
+    raw_hash = hashlib.sha256(
+        (ROOT / "04_raw_data/raw_harvest_snapshot.jsonl").read_bytes()
+    ).hexdigest()
+    assert raw_hash == protocol["raw_data_hash"]
+
+
+def test_audit_blocks_unsubstantiated_repeated_snapshot():
+    report = audit()
+    assert report["candidate_count"] == 13500
+    assert report["unique_text_count"] == 297
+    assert report["raw_matching_text_count"] == 0
+    assert report["target_threat_rate"] == round(652 / 900, 4)
+    assert not report["next_stage_allowed"]
+    assert any("Raw snapshot" in reason for reason in report["blocking_reasons"])
+
+
+def test_audit_uses_configured_threshold(monkeypatch):
+    original = config()
+    original["thresholds"]["target_threat_rate_min"] = 0.8
+    monkeypatch.setattr("audit.config", lambda: original)
+    assert "TARGET_THREAT rate below threshold" in audit()["blocking_reasons"]

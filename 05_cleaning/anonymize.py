@@ -1,22 +1,22 @@
+"""Heuristic masking of common identifiers; human PII review is still required."""
 import re
 
-def anonymize_text(text: str) -> str:
-    # Email first so @ inside email doesn't get picked up by username
-    text = re.sub(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', '[EMAIL]', text)
-    # URL (http/https)
-    text = re.sub(r'https?://\S+', '[ССЫЛКА]', text)
-    # domains/t.me
-    text = re.sub(r't\.me/\S+', '[ССЫЛКА]', text)
-    # Phone numbers (+7...)
-    text = re.sub(r'\+7[\s\-\(]*\d{3}[\s\-\)]*\d{3}[\s\-]*\d{2}[\s\-]*\d{2}', '[ТЕЛЕФОН]', text)
-    # Usernames (@...)
-    text = re.sub(r'@\w+', '[АККАУНТ]', text)
-    # Geo
-    text = re.sub(r'\d{2}\.\d{3},\s?\d{2}\.\d{3}', '[ГЕОЛОКАЦИЯ]', text)
-    # Names (simple heuristic or placeholder)
-    text = re.sub(r'Данияр[уа]?', '[ИМЯ]', text)
-    return text
+EMAIL = re.compile(r"(?i)\b[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}\b")
+URL = re.compile(r"(?i)(?:https?://|www\.|t\.me/)\S+")
+PHONE = re.compile(r"(?<!\d)(?:\+?7|8)[\s()\-]*\d{3}[\s()\-]*\d{3}[\s\-]*\d{2}[\s\-]*\d{2}(?!\d)")
+HANDLE = re.compile(r"(?<!\w)@[\w.]{2,}", re.UNICODE)
+COORDINATES = re.compile(r"(?<!\d)-?\d{1,2}\.\d{3,},\s*-?\d{1,3}\.\d{3,}(?!\d)")
 
-if __name__ == "__main__":
-    sample = "Call +7 777 123 45 67 or +77771234567, email job@mail.ru, see https://example.com @username"
-    print(anonymize_text(sample))
+
+def anonymize_text(text: str) -> str:
+    if not isinstance(text, str):
+        raise TypeError("text must be a string")
+    for pattern, replacement in (
+        (EMAIL, "[EMAIL]"),
+        (URL, "[URL]"),
+        (PHONE, "[PHONE]"),
+        (HANDLE, "[ACCOUNT]"),
+        (COORDINATES, "[GEO]"),
+    ):
+        text = pattern.sub(replacement, text)
+    return text

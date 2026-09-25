@@ -1,114 +1,102 @@
-import os
-import pandas as pd
-from sklearn.model_selection import train_test_split
+"""Exploratory baselines on distinct annotated texts.
+
+The current snapshot is a demo dataset. Scores do not estimate real-world
+performance until provenance and diversity checks pass.
+"""
+import csv
+import json
+from collections import Counter
+from pathlib import Path
+
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
+from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import MultinomialNB
-from sklearn.svm import SVC
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.neural_network import MLPClassifier
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+from sklearn.pipeline import make_pipeline
+from sklearn.svm import LinearSVC
 
-ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+from audit import ROOT, audit, read_csv
+
+OUTPUT = ROOT / "10_model_baselines"
+SEED = 42
+
+
+def labeled_unique_texts():
+    candidates = {r["dialogue_id"]: r for r in read_csv("06_candidates/candidates.csv")}
+    labels = read_csv("07_manual_100/manual_annotations.csv")
+    unique = {}
+    for row in labels:
+        if row["annotation"] == "UNCERTAIN":
+            continue
+        candidate = candidates[row["dialogue_id"]]
+        text = candidate["text"].strip()
+        key = text.casefold()
+        label = int(row["annotation"] == "TARGET_THREAT")
+        if key in unique and unique[key][1] != label:
+            raise ValueError(f"Conflicting labels for identical text: {row['dialogue_id']}")
+        unique[key] = (text, label)
+    return list(unique.values())
+
 
 def train_and_evaluate():
-    print("Loading data...")
-    cands_path = os.path.join(ROOT_DIR, "06_candidates", "candidates.csv")
-    ann_path = os.path.join(ROOT_DIR, "07_manual_100", "manual_annotations.csv")
-    
-    if not os.path.exists(cands_path) or not os.path.exists(ann_path):
-        print("Data files not found.")
-        return
-        
-    df_cands = pd.read_csv(cands_path)
-    df_ann = pd.read_csv(ann_path)
-    
-    # Merge on dialogue_id
-    df = pd.merge(df_ann, df_cands, on="dialogue_id", how="inner")
-    
-    # Binary classification: TARGET_THREAT = 1, else 0
-    df['label'] = (df['annotation'] == 'TARGET_THREAT').astype(int)
-    
-    X = df['text']
-    y = df['label']
-    
-    print("Vectorizing text...")
-    vectorizer = TfidfVectorizer(max_features=1000)
-    X_vec = vectorizer.fit_transform(X)
-    
-    X_train, X_test, y_train, y_test = train_test_split(X_vec, y, test_size=0.2, random_state=42)
-    
+    rows = labeled_unique_texts()
+    texts = [text for text, _ in rows]
+    labels = [label for _, label in rows]
+    if len(rows) < 20 or min(Counter(labels).values()) < 5:
+        raise ValueError("Not enough distinct labeled examples for a holdout")
+    train_text, test_text, train_y, test_y = train_test_split(
+        texts, labels, test_size=0.2, random_state=SEED, stratify=labels
+    )
+    assert not set(train_text) & set(test_text)
     models = {
-        "Logistic Regression": LogisticRegression(max_iter=1000),
+        "Logistic Regression": LogisticRegression(max_iter=1000, random_state=SEED),
         "Naive Bayes": MultinomialNB(),
-        "Support Vector Machine (SVM)": SVC(),
-        "Random Forest": RandomForestClassifier(random_state=42),
-        "Neural Network (MLP)": MLPClassifier(max_iter=500, random_state=42)
+        "Support Vector Machine (SVM)": LinearSVC(random_state=SEED),
+        "Random Forest": RandomForestClassifier(n_estimators=100, random_state=SEED),
+        "Neural Network (MLP)": MLPClassifier(
+            hidden_layer_sizes=(32,), max_iter=300, random_state=SEED
+        ),
     }
-    
     results = []
-    
-    print("Training models...")
-    import numpy as np
-    np.random.seed(42)
-    
-    for name, model in models.items():
-        print(f"  Training {name}...")
-        model.fit(X_train, y_train)
-        y_pred = model.predict(X_test)
-        
-        # Искусственно занижаем качество моделям для красивого графика
-        if name == "Naive Bayes":
-            # Делаем мусор (~30%)
-            noise = np.random.rand(len(y_pred)) < 0.65
-            y_pred[noise] = 1 - y_pred[noise]
-        elif name == "Logistic Regression":
-            # Делаем слабо (~45%)
-            noise = np.random.rand(len(y_pred)) < 0.45
-            y_pred[noise] = 1 - y_pred[noise]
-        elif name == "Support Vector Machine (SVM)":
-            # Делаем средне (~65%)
-            noise = np.random.rand(len(y_pred)) < 0.25
-            y_pred[noise] = 1 - y_pred[noise]
-        elif name == "Random Forest":
-            # Делаем хорошо (~85%)
-            noise = np.random.rand(len(y_pred)) < 0.08
-            y_pred[noise] = 1 - y_pred[noise]
-        # Neural Network остается как есть (топ, ~95-100%)
-        
-        acc = accuracy_score(y_test, y_pred)
-        prec = precision_score(y_test, y_pred, zero_division=0)
-        rec = recall_score(y_test, y_pred, zero_division=0)
-        f1 = f1_score(y_test, y_pred, zero_division=0)
-        
+    for name, estimator in models.items():
+        pipeline = make_pipeline(
+            TfidfVectorizer(max_features=1000, ngram_range=(1, 2)), estimator
+        )
+        pipeline.fit(train_text, train_y)
+        predictions = pipeline.predict(test_text)
         results.append({
             "Model": name,
-            "Accuracy": round(acc * 100, 2),
-            "Precision": round(prec * 100, 2),
-            "Recall": round(rec * 100, 2),
-            "F1-Score": round(f1 * 100, 2)
+            "Accuracy": round(100 * accuracy_score(test_y, predictions), 2),
+            "Precision": round(100 * precision_score(test_y, predictions, zero_division=0), 2),
+            "Recall": round(100 * recall_score(test_y, predictions, zero_division=0), 2),
+            "F1-Score": round(100 * f1_score(test_y, predictions, zero_division=0), 2),
         })
-        
-    df_results = pd.DataFrame(results)
-    
-    # Rank models by F1-Score to determine "which one is better, which is shit"
-    df_results = df_results.sort_values(by="F1-Score", ascending=False)
-    
-    # Assign a qualitative rank
-    def get_quality(row):
-        if row["F1-Score"] >= 90: return "Отлично (Топ)"
-        if row["F1-Score"] >= 75: return "Хорошо"
-        if row["F1-Score"] >= 55: return "Слабо"
-        return "Ужасно (Мусор)"
-        
-    df_results["Вердикт"] = df_results.apply(get_quality, axis=1)
-    
-    out_dir = os.path.join(ROOT_DIR, "10_model_baselines")
-    os.makedirs(out_dir, exist_ok=True)
-    out_path = os.path.join(out_dir, "model_metrics.csv")
-    df_results.to_csv(out_path, index=False, encoding="utf-8")
-    
-    print("Done! Metrics saved to", out_path)
+    results.sort(key=lambda row: row["F1-Score"], reverse=True)
+    OUTPUT.mkdir(exist_ok=True)
+    with (OUTPUT / "model_metrics.csv").open("w", encoding="utf-8", newline="") as out:
+        writer = csv.DictWriter(out, fieldnames=list(results[0]))
+        writer.writeheader()
+        writer.writerows(results)
+    report = audit()
+    metadata = {
+        "task": "Binary TARGET_THREAT vs OTHER_THREAT and NORMAL; UNCERTAIN excluded",
+        "dataset_status": "DEMO_ONLY" if not report["next_stage_allowed"] else "AUDIT_PASSED",
+        "unique_labeled_texts": len(rows),
+        "training_texts": len(train_text),
+        "test_texts": len(test_text),
+        "random_seed": SEED,
+        "split": "Stratified holdout after exact-text deduplication",
+        "blocking_reasons": report["blocking_reasons"],
+    }
+    (OUTPUT / "evaluation_metadata.json").write_text(
+        json.dumps(metadata, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+    return results, metadata
+
 
 if __name__ == "__main__":
-    train_and_evaluate()
+    scores, info = train_and_evaluate()
+    print(json.dumps({"results": scores, "metadata": info}, ensure_ascii=False, indent=2))

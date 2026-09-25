@@ -5,3 +5,5 @@ quotas:
 thresholds:
   target_threat_rate_min: 0.70
   uncertain_rate_max: 0.15
+  min_unique_texts_per_subtype: 100
+  duplicate_rate_max: 0.50

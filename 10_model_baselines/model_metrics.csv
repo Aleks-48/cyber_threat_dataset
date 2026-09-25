@@ -1,6 +1,6 @@
-Model,Accuracy,Precision,Recall,F1-Score,Вердикт
-Neural Network (MLP),100.0,100.0,100.0,100.0,Отлично (Топ)
-Random Forest,92.22,97.54,91.54,94.44,Отлично (Топ)
-Support Vector Machine (SVM),76.67,90.74,75.38,82.35,Хорошо
-Logistic Regression,50.56,71.58,52.31,60.44,Слабо
-Naive Bayes,35.0,57.83,36.92,45.07,Ужасно (Мусор)
+Model,Accuracy,Precision,Recall,F1-Score
+Logistic Regression,100.0,100.0,100.0,100.0
+Naive Bayes,100.0,100.0,100.0,100.0
+Support Vector Machine (SVM),100.0,100.0,100.0,100.0
+Random Forest,100.0,100.0,100.0,100.0
+Neural Network (MLP),100.0,100.0,100.0,100.0
