@@ -56,20 +56,20 @@ if page == "Данные":
     st.subheader("Данные набора")
     st.metric("Всего записей в датасете", f"{total_count:,}".replace(",", " "))
     subtype = st.selectbox("Фильтр по подвиду", ["Все"] + sorted(candidates["target_subtype"].unique()))
-    table = candidates.copy()
-    if subtype != "Все":
-        table = table[table["target_subtype"] == subtype]
     source_columns = sources[["source_id", "source_name", "platform", "url"]].rename(
         columns={"url": "source_url"}
     )
-    table = table.merge(source_columns, on="source_id", how="left", validate="many_to_one")
+    full_table = candidates.merge(
+        source_columns, on="source_id", how="left", validate="many_to_one"
+    )
+    table = full_table if subtype == "Все" else full_table[full_table["target_subtype"] == subtype]
     st.caption(
         f"В таблице: {len(table):,} из {total_count:,} записей. "
-        "Показываются все строки датасета; поиск, сортировка и фильтр доступны в таблице."
+        "Ограничения в 1 000 строк нет; выбранный фильтр меняет только таблицу."
     )
     st.download_button(
         "Скачать все 13 500 записей CSV",
-        data=table.to_csv(index=False).encode("utf-8-sig"),
+        data=full_table.to_csv(index=False).encode("utf-8-sig"),
         file_name="cyber_threat_dataset_13500.csv",
         mime="text/csv",
         type="primary",
