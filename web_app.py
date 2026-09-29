@@ -30,7 +30,9 @@ if not report["next_stage_allowed"]:
 
 if page == "Данные":
     candidates = load_csv("06_candidates/candidates.csv")
+    sources = load_csv("02_sources/sources_approved.csv")
     annotations = load_csv("07_manual_100/manual_annotations.csv")
+    total_count = len(candidates)
     a, b, c, d = st.columns(4)
     a.metric("Записей", report["candidate_count"])
     b.metric("Уникальных текстов", report["unique_text_count"])
@@ -51,10 +53,33 @@ if page == "Данные":
             px.bar(labels, x="annotation", y="count"), width="stretch"
         )
     st.caption("Частоты относятся к строкам файла, а не к независимым диалогам.")
-    subtype = st.selectbox("Подвид", ["Все"] + sorted(candidates["target_subtype"].unique()))
+    st.subheader("Данные набора")
+    st.metric("Всего записей в датасете", f"{total_count:,}".replace(",", " "))
+    subtype = st.selectbox("Фильтр по подвиду", ["Все"] + sorted(candidates["target_subtype"].unique()))
+    table = candidates.copy()
     if subtype != "Все":
-        candidates = candidates[candidates["target_subtype"] == subtype]
-    st.dataframe(candidates.head(1000), width="stretch")
+        table = table[table["target_subtype"] == subtype]
+    source_columns = sources[["source_id", "source_name", "platform", "url"]].rename(
+        columns={"url": "source_url"}
+    )
+    table = table.merge(source_columns, on="source_id", how="left", validate="many_to_one")
+    st.caption(
+        f"В таблице: {len(table):,} из {total_count:,} записей. "
+        "Показываются все строки датасета; поиск, сортировка и фильтр доступны в таблице."
+    )
+    st.download_button(
+        "Скачать все 13 500 записей CSV",
+        data=table.to_csv(index=False).encode("utf-8-sig"),
+        file_name="cyber_threat_dataset_13500.csv",
+        mime="text/csv",
+        type="primary",
+    )
+    st.dataframe(
+        table,
+        width="stretch",
+        height=760,
+        hide_index=True,
+    )
 
 elif page == "Качество и аудит":
     if st.button("Пересчитать и сохранить аудит"):
