@@ -101,23 +101,96 @@ else:
     metadata_path = ROOT / "10_model_baselines/evaluation_metadata.json"
     scores_path = ROOT / "10_model_baselines/model_metrics.csv"
     if not metadata_path.exists() or not scores_path.exists():
-        st.info("Метрики ещё не рассчитаны. Запустите train_models.py.")
+        st.info("Метрики ещё не рассчитаны. Запустите train_models.py и опубликуйте результаты.")
     else:
         metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
         scores = pd.read_csv(scores_path)
+        st.subheader("Пять открытых моделей: оценка от 0 до 5")
         st.info(
             f"Статус: {metadata['dataset_status']}. "
+            f"Всего уникальных размеченных текстов: {metadata['unique_labeled_texts']}; "
             f"Обучающих уникальных текстов: {metadata['training_texts']}; "
             f"тестовых: {metadata['test_texts']}."
         )
-        st.dataframe(scores, width="stretch")
+        st.caption(
+            "Все пять моделей — открытые алгоритмы scikit-learn, обученные локально "
+            "на этом наборе. Они не являются пятью внешними сервисами или "
+            "предобученными большими языковыми моделями."
+        )
+        st.dataframe(
+            scores,
+            width="stretch",
+            hide_index=True,
+            column_config={
+                "Открытый исходный код": st.column_config.LinkColumn(
+                    "Исходный код и документация"
+                ),
+            },
+        )
         st.plotly_chart(
-            px.bar(scores, x="Model", y="F1-Score", text="F1-Score"),
+            px.bar(
+                scores,
+                x="Model",
+                y="Оценка 0–5",
+                text="Оценка 0–5",
+                range_y=[0, 5],
+            ),
             width="stretch",
         )
         st.caption(
+            "Оценка = F1 (%) / 20; равные F1 делят одно место. "
             "Бинарная задача TARGET_THREAT против OTHER_THREAT и NORMAL; "
             "UNCERTAIN исключены. "
             "Метрики получены на отложенных уникальных текстах из текущего снимка; "
-            "они не измеряют качество на реальных новых источниках."
+            "шаблонное сходство и провал аудита не позволяют достоверно ранжировать "
+            "модели по работе на реальных новых источниках."
         )
+        predictions_path = ROOT / "10_model_baselines/model_predictions.csv"
+        if predictions_path.exists():
+            predictions = load_csv("10_model_baselines/model_predictions.csv")
+            model_names = scores["Model"].tolist()
+            if len(predictions) == metadata.get("analyzed_dataset_rows") and all(
+                name in predictions.columns for name in model_names
+            ):
+                st.subheader("Анализ всех записей")
+                st.caption(
+                    "Каждая из пяти моделей обработала все строки датасета. "
+                    "Прогноз 1 означает TARGET_THREAT; это автоматическая оценка, "
+                    "а не ручная разметка или проверенный факт."
+                )
+                st.metric("Обработано каждой моделью", f"{len(predictions):,}".replace(",", " "))
+                summary = pd.DataFrame({
+                    "Модель": model_names,
+                    "Прогноз 1": [int(predictions[name].sum()) for name in model_names],
+                    "Прогноз 0": [int((predictions[name] == 0).sum()) for name in model_names],
+                })
+                st.dataframe(summary, width="stretch", hide_index=True)
+                candidates = load_csv("06_candidates/candidates.csv")
+                sources = load_csv("02_sources/sources_approved.csv")
+                enriched = candidates.merge(
+                    predictions.drop(columns="source_id"),
+                    on="dialogue_id",
+                    how="left",
+                    validate="one_to_one",
+                ).merge(
+                    sources[["source_id", "source_name", "platform", "url"]].rename(
+                        columns={"url": "source_url"}
+                    ),
+                    on="source_id",
+                    how="left",
+                    validate="many_to_one",
+                )
+                st.download_button(
+                    "Скачать все записи с прогнозами пяти моделей CSV",
+                    data=enriched.to_csv(index=False).encode("utf-8-sig"),
+                    file_name="cyber_threat_dataset_13500_five_model_predictions.csv",
+                    mime="text/csv",
+                )
+                selected_model = st.selectbox("Модель для анализа по каналам", model_names)
+                by_source = (
+                    enriched.groupby(["source_name", "platform"], dropna=False)
+                    .agg(Записей=("dialogue_id", "size"), Прогнозов_1=(selected_model, "sum"))
+                    .reset_index()
+                    .sort_values("Записей", ascending=False)
+                )
+                st.dataframe(by_source, width="stretch", hide_index=True)
