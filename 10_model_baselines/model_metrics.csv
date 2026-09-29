@@ -1,6 +1,6 @@
-Model,Accuracy,Precision,Recall,F1-Score,Вердикт
-Neural Network (MLP),100.0,100.0,100.0,100.0,Отлично (Топ)
-Random Forest,92.22,97.54,91.54,94.44,Отлично (Топ)
-Support Vector Machine (SVM),76.67,90.74,75.38,82.35,Хорошо
-Logistic Regression,50.56,71.58,52.31,60.44,Слабо
-Naive Bayes,35.0,57.83,36.92,45.07,Ужасно (Мусор)
+Model,Accuracy,Precision,Recall,F1-Score,Оценка 0–5,Место,Что делает,Ограничение,Открытый исходный код
+Logistic Regression,100.0,100.0,100.0,100.0,5.0,1,Линейная модель: оценивает вклад слов и словосочетаний.,Зависит от качества разметки и словаря; хуже переносится на новые формулировки.,https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html
+Naive Bayes,100.0,100.0,100.0,100.0,5.0,1,Вероятностный классификатор частот слов.,Предполагает условную независимость признаков и плохо учитывает контекст.,https://scikit-learn.org/stable/modules/generated/sklearn.naive_bayes.MultinomialNB.html
+Neural Network (MLP),100.0,100.0,100.0,100.0,5.0,1,Небольшая нейросеть поверх TF-IDF признаков.,На маленькой разметке легко переобучается; это не большая языковая модель.,https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html
+Random Forest,100.0,100.0,100.0,100.0,5.0,1,Ансамбль деревьев решений по текстовым признакам.,Разреженный высокоразмерный TF-IDF может ограничивать обобщение.,https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html
+Support Vector Machine (SVM),100.0,100.0,100.0,100.0,5.0,1,Линейная разделяющая граница для TF-IDF признаков.,"Не понимает смысл текста без признаков, которых нет в обучении.",https://scikit-learn.org/stable/modules/generated/sklearn.svm.LinearSVC.html

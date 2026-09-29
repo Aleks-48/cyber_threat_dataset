@@ -1,0 +1,30 @@
+{
+  "task": "Binary TARGET_THREAT vs OTHER_THREAT and NORMAL; UNCERTAIN excluded",
+  "dataset_status": "DEMO_ONLY",
+  "unique_labeled_texts": 166,
+  "training_texts": 132,
+  "test_texts": 34,
+  "analyzed_dataset_rows": 13500,
+  "prediction_label_1": "TARGET_THREAT (exploratory prediction, not a verified annotation)",
+  "random_seed": 42,
+  "split": "Stratified holdout after exact-text deduplication",
+  "rating_method": "0–5 = F1 percentage / 20; equal F1 scores share a place",
+  "model_library": "scikit-learn (open source); models trained locally on this dataset",
+  "interpretation": "Exploratory only; template similarity and failed audit prevent real-world ranking",
+  "blocking_reasons": [
+    "Too few unique texts: EXTREMIST_PROPAGANDA",
+    "Too few unique texts: EXTREMIST_RECRUITMENT",
+    "Too few unique texts: VIOLENCE_GLORIFICATION",
+    "Too few unique texts: DANGEROUS_CHALLENGE",
+    "Too few unique texts: SELF_HARM_ENCOURAGEMENT",
+    "Too few unique texts: SUICIDE_ENCOURAGEMENT",
+    "Too few unique texts: CRIMINAL_RECRUITMENT",
+    "Too few unique texts: GROUP_LOYALTY_PRESSURE",
+    "Too few unique texts: SECRET_COMMUNICATION_REQUEST",
+    "Duplicate text rate above threshold",
+    "Missing or incorrect keywords_hash",
+    "Missing or incorrect sources_hash",
+    "Raw snapshot does not substantiate candidate text",
+    "Identical texts have conflicting language labels"
+  ]
+}

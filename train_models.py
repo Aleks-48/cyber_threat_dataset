@@ -22,6 +22,33 @@ from audit import ROOT, audit, read_csv
 
 OUTPUT = ROOT / "10_model_baselines"
 SEED = 42
+MODEL_INFO = {
+    "Logistic Regression": {
+        "description": "Линейная модель: оценивает вклад слов и словосочетаний.",
+        "limitation": "Зависит от качества разметки и словаря; хуже переносится на новые формулировки.",
+        "source": "https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html",
+    },
+    "Naive Bayes": {
+        "description": "Вероятностный классификатор частот слов.",
+        "limitation": "Предполагает условную независимость признаков и плохо учитывает контекст.",
+        "source": "https://scikit-learn.org/stable/modules/generated/sklearn.naive_bayes.MultinomialNB.html",
+    },
+    "Support Vector Machine (SVM)": {
+        "description": "Линейная разделяющая граница для TF-IDF признаков.",
+        "limitation": "Не понимает смысл текста без признаков, которых нет в обучении.",
+        "source": "https://scikit-learn.org/stable/modules/generated/sklearn.svm.LinearSVC.html",
+    },
+    "Random Forest": {
+        "description": "Ансамбль деревьев решений по текстовым признакам.",
+        "limitation": "Разреженный высокоразмерный TF-IDF может ограничивать обобщение.",
+        "source": "https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html",
+    },
+    "Neural Network (MLP)": {
+        "description": "Небольшая нейросеть поверх TF-IDF признаков.",
+        "limitation": "На маленькой разметке легко переобучается; это не большая языковая модель.",
+        "source": "https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html",
+    },
+}
 
 
 def labeled_unique_texts():
@@ -43,6 +70,11 @@ def labeled_unique_texts():
 
 def train_and_evaluate():
     rows = labeled_unique_texts()
+    candidates = read_csv("06_candidates/candidates.csv")
+    prediction_rows = [
+        {"dialogue_id": row["dialogue_id"], "source_id": row["source_id"]}
+        for row in candidates
+    ]
     texts = [text for text, _ in rows]
     labels = [label for _, label in rows]
     if len(rows) < 20 or min(Counter(labels).values()) < 5:
@@ -67,6 +99,9 @@ def train_and_evaluate():
         )
         pipeline.fit(train_text, train_y)
         predictions = pipeline.predict(test_text)
+        all_predictions = pipeline.predict([row["text"] for row in candidates])
+        for candidate_row, prediction in zip(prediction_rows, all_predictions):
+            candidate_row[name] = int(prediction)
         results.append({
             "Model": name,
             "Accuracy": round(100 * accuracy_score(test_y, predictions), 2),
@@ -74,12 +109,24 @@ def train_and_evaluate():
             "Recall": round(100 * recall_score(test_y, predictions, zero_division=0), 2),
             "F1-Score": round(100 * f1_score(test_y, predictions, zero_division=0), 2),
         })
-    results.sort(key=lambda row: row["F1-Score"], reverse=True)
+    results.sort(key=lambda row: (-row["F1-Score"], -row["Recall"], row["Model"]))
+    for row in results:
+        row["Оценка 0–5"] = round(row["F1-Score"] / 20, 2)
+        row["Место"] = 1 + sum(
+            other["F1-Score"] > row["F1-Score"] for other in results
+        )
+        row["Что делает"] = MODEL_INFO[row["Model"]]["description"]
+        row["Ограничение"] = MODEL_INFO[row["Model"]]["limitation"]
+        row["Открытый исходный код"] = MODEL_INFO[row["Model"]]["source"]
     OUTPUT.mkdir(exist_ok=True)
     with (OUTPUT / "model_metrics.csv").open("w", encoding="utf-8", newline="") as out:
         writer = csv.DictWriter(out, fieldnames=list(results[0]))
         writer.writeheader()
         writer.writerows(results)
+    with (OUTPUT / "model_predictions.csv").open("w", encoding="utf-8", newline="") as out:
+        writer = csv.DictWriter(out, fieldnames=list(prediction_rows[0]))
+        writer.writeheader()
+        writer.writerows(prediction_rows)
     report = audit()
     metadata = {
         "task": "Binary TARGET_THREAT vs OTHER_THREAT and NORMAL; UNCERTAIN excluded",
@@ -87,8 +134,13 @@ def train_and_evaluate():
         "unique_labeled_texts": len(rows),
         "training_texts": len(train_text),
         "test_texts": len(test_text),
+        "analyzed_dataset_rows": len(prediction_rows),
+        "prediction_label_1": "TARGET_THREAT (exploratory prediction, not a verified annotation)",
         "random_seed": SEED,
         "split": "Stratified holdout after exact-text deduplication",
+        "rating_method": "0–5 = F1 percentage / 20; equal F1 scores share a place",
+        "model_library": "scikit-learn (open source); models trained locally on this dataset",
+        "interpretation": "Exploratory only; template similarity and failed audit prevent real-world ranking",
         "blocking_reasons": report["blocking_reasons"],
     }
     (OUTPUT / "evaluation_metadata.json").write_text(
