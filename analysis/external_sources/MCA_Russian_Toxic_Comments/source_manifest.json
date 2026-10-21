@@ -1,0 +1,37 @@
+{
+  "dataset_title": "MCA Workshop - Toxic comments",
+  "doi": "10.17632/fktgy52645.1",
+  "dataset_url": "https://data.mendeley.com/datasets/fktgy52645/1",
+  "authors": [
+    "Liliya Komalova",
+    "Tatiana Goloshchapova",
+    "Leonid Motovskikh",
+    "Rostislav Epifanov",
+    "Dmitry Morozov",
+    "Anna Glazkova"
+  ],
+  "published": "2021-02-22",
+  "language": "Russian",
+  "collection_description": "Tagged comments collected during Mathematical Center in Akademgorodok First Workshop; dataset page says comments are from VK and labels were guided by domain experts.",
+  "original_label_fields": {
+    "decent": "decent vs obscene; source-described mark for presence of obscene words",
+    "moral": "moral vs immoral",
+    "person": "person/imperson/imperson insult; source metadata kept in raw file"
+  },
+  "experiment_uses_field": "decent only, unchanged source values (decent/obscene)",
+  "license": "CC BY 4.0 (Mendeley Data dataset page)",
+  "license_url": "https://creativecommons.org/licenses/by/4.0/",
+  "file": {
+    "filename": "combined.csv",
+    "content_type": "text/csv",
+    "bytes": 1579284,
+    "sha256": "6636a1195a683407e6ce6734430e0713d2b71b6b391a18490e7c1c9c68575b53",
+    "mendeley_file_id": "e56b93dd-136e-42ab-8c76-ac72df62e3dd",
+    "content_id": "fd546f24-caa8-49a2-9a79-11586c42e910",
+    "download_url": "https://data.mendeley.com/public-files/datasets/fktgy52645/files/e56b93dd-136e-42ab-8c76-ac72df62e3dd/file_downloaded",
+    "status": "COMPLETED"
+  },
+  "privacy_handling": "Raw file contains text and VK source URLs and is locally ignored by Git. Derived experiment artifacts contain IDs, labels, hashes and aggregates only; obvious direct identifiers were filtered from model input. Streamlit dashboard does not display/download comments.",
+  "retrieval": "Public Mendeley metadata and download endpoints; no account login or terms acceptance."
+}
+

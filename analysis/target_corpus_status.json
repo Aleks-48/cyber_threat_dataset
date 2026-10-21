@@ -1,0 +1,7 @@
+{
+  "verified_target_messages": 0,
+  "required_target_messages": 13500,
+  "reason": "The original target table contains 13,500 rows but only 297 exact unique strings and 221 detected near-duplicate pairs; the raw snapshot repeats the placeholder 'Raw dialogue', and none of the raw rows match candidate text. Existing approved-source records lack license/terms evidence. No target harmful-influence message is verified.",
+  "scope": "Nine harmful-influence subtypes; harmful influence directed at others, not generic toxicity, customer sentiment, or self-reported risk."
+}
+

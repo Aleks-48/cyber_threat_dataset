@@ -1,0 +1,128 @@
+{
+  "experiment_status": "COMPLETE_SEPARATE_TASK_NOT_HARMFUL_INFLUENCE",
+  "task": "binary prediction of the source's original decent/obscene label; narrower than general toxicity",
+  "dataset_title": "MCA Workshop - Toxic comments",
+  "dataset_doi": "10.17632/fktgy52645.1",
+  "dataset_url": "https://data.mendeley.com/datasets/fktgy52645/1",
+  "license": "CC BY 4.0",
+  "license_url": "https://creativecommons.org/licenses/by/4.0/",
+  "raw_file_sha256": "6636a1195a683407e6ce6734430e0713d2b71b6b391a18490e7c1c9c68575b53",
+  "raw_file_bytes": 1579284,
+  "raw_row_count": 3804,
+  "raw_original_decent_label_counts": {
+    "obscene": 515,
+    "decent": 3287,
+    "unmarked": 2
+  },
+  "model_input_field": "message",
+  "original_label_field": "decent",
+  "original_class_names": {
+    "decent": "decent (source label)",
+    "obscene": "obscene (source label; positive class for interpretation only)"
+  },
+  "original_other_annotation_fields_preserved_in_raw_only": [
+    "moral",
+    "person",
+    "sex",
+    "text",
+    "source"
+  ],
+  "exact_dedup_key": "NFKC(casefold(original message), whitespace-collapsed) only; original label is not part of the key",
+  "exact_duplicate_text_groups": 16,
+  "exact_duplicate_rows_removed": 24,
+  "exact_text_label_conflict_groups_removed": 0,
+  "near_duplicate_method": "char TF-IDF 3-5 grams, nearest five neighbors, cosine >= 0.90; connected components removed to one representative; groups with original-label conflict excluded",
+  "near_duplicate_threshold": 0.9,
+  "near_duplicate_pair_count_detected_initial": 22,
+  "near_duplicate_pair_occurrences_seen_across_rounds": 23,
+  "near_duplicate_removal_rounds": 2,
+  "near_duplicate_rows_removed": 21,
+  "near_duplicate_pairs_in_final_pool": 0,
+  "near_duplicate_conflict_groups_removed": 0,
+  "direct_identifier_filter": "regex screen on message text for email, URL, phone-like string, and @handle; not full anonymization",
+  "direct_identifier_pattern_counts": {
+    "url": 33,
+    "phone_like": 8,
+    "public_handle": 1
+  },
+  "excluded_record_count": 104,
+  "excluded_rows_by_reason": {
+    "direct_identifier_pattern": 39,
+    "unmarked_or_out_of_scope_original_label": 2,
+    "empty_message": 18,
+    "exact_duplicate_text_only": 24,
+    "near_duplicate_group_representative_only": 21
+  },
+  "usable_unique_rows_after_filters": 3700,
+  "original_label_counts_after_filters": {
+    "obscene": 508,
+    "decent": 3192
+  },
+  "split_counts_by_labels": {
+    "train": {
+      "rows": 2241,
+      "labels": {
+        "obscene": 328,
+        "decent": 1913
+      },
+      "source_groups": 69
+    },
+    "validation": {
+      "rows": 728,
+      "labels": {
+        "decent": 639,
+        "obscene": 89
+      },
+      "source_groups": 25
+    },
+    "test": {
+      "rows": 731,
+      "labels": {
+        "decent": 640,
+        "obscene": 91
+      },
+      "source_groups": 29
+    }
+  },
+  "split_method": "two-stage StratifiedGroupKFold; source post URLs are groups, no post group crosses train/validation/test",
+  "test_split_created_before_model_fitting": true,
+  "hyperparameter_tuning": "none; all five model and vectorizer settings fixed before model fitting; test scores are held-out evaluation",
+  "random_seed": 42,
+  "vectorizer": {
+    "class": "TfidfVectorizer",
+    "ngram_range": [
+      1,
+      2
+    ],
+    "min_df": 2,
+    "max_features": 15000,
+    "sublinear_tf": true
+  },
+  "library_versions": {
+    "python": "3.12.10",
+    "scikit_learn": "1.9.1",
+    "numpy": "2.5.4",
+    "scipy": "1.18.1"
+  },
+  "run_started_utc": "2026-10-21T14:59:53.911557+00:00",
+  "run_finished_utc": "2026-10-21T15:00:17.044330+00:00",
+  "total_elapsed_seconds": 23.1335,
+  "per_model_seconds": {
+    "Logistic Regression": 0.2569,
+    "MultinomialNB": 0.237,
+    "LinearSVC": 0.2511,
+    "RandomForest": 2.2571,
+    "MLP": 7.5623
+  },
+  "warnings": [],
+  "prediction_file_contains_text": false,
+  "dashboard_displays_raw_text": false,
+  "limitations": [
+    "This measures the author's source label for obscene-language presence, not broad toxicity, harmful influence, or the nine target subtypes.",
+    "The dataset is a small, potentially class-imbalanced workshop corpus with VK source posts; results may not generalize beyond it.",
+    "Regex filtering only catches obvious direct identifiers; it is not full anonymization or privacy review.",
+    "Near-duplicate detection is approximate and uses nearest-neighbor surface-form similarity; it may miss semantic paraphrases.",
+    "Class labels are inherited from the source and not independently re-annotated."
+  ]
+}
+

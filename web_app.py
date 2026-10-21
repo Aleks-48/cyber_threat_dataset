@@ -1,196 +1,76 @@
-"""Read-only dashboard for the checked-in dataset and its audit."""
+"""Privacy-safe dashboard for the audited Russian experiment and target-data status."""
+from __future__ import annotations
+
 import json
-import subprocess
-import sys
 from pathlib import Path
 
 import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from audit import ROOT, audit
-
-st.set_page_config(page_title="Cyber Threat Dataset", layout="wide")
-st.title("Cyber Threat Dataset — Theme 8")
-st.caption("Research snapshot. Review the audit before interpreting model scores.")
+ROOT = Path(__file__).resolve().parent
+RU = ROOT / "analysis" / "experiments" / "ru_obscene_ml"
 
 
-@st.cache_data
-def load_csv(relative_path):
-    return pd.read_csv(ROOT / relative_path)
+def read_json(path: Path):
+    with path.open(encoding="utf-8") as handle:
+        return json.load(handle)
 
 
-page = st.sidebar.radio(
-    "Раздел",
-    ["Данные", "Качество и аудит", "Модели"],
-)
-report = audit()
-if not report["next_stage_allowed"]:
-    st.warning("Датасет не прошёл аудит качества. Результаты моделей носят демонстрационный характер.")
+st.set_page_config(page_title="Cyber Threat Dataset Audit", layout="wide")
+st.title("Cyber Threat Dataset - reproducible research")
+st.caption("Privacy-safe aggregate results. This dashboard does not load or display source messages.")
+page = st.sidebar.radio("Section", ["Russian ML experiment", "Target corpus status"])
 
-if page == "Данные":
-    candidates = load_csv("06_candidates/candidates.csv")
-    sources = load_csv("02_sources/sources_approved.csv")
-    annotations = load_csv("07_manual_100/manual_annotations.csv")
-    total_count = len(candidates)
+if page == "Russian ML experiment":
+    audit = read_json(RU / "audit.json")
+    metrics = read_json(RU / "metrics.json")
+    st.header("Russian obscene-language classification")
+    st.markdown(
+        "Source: [MCA Workshop - Toxic comments](https://data.mendeley.com/datasets/fktgy52645/1), "
+        "DOI `10.17632/fktgy52645.1`; the source manifest records CC BY 4.0. "
+        "This predicts the source's original `decent` / `obscene` labels. It is not a "
+        "harmful-influence or cyber-threat classifier. The five systems are scikit-learn ML models, not LLMs."
+    )
     a, b, c, d = st.columns(4)
-    a.metric("Записей", report["candidate_count"])
-    b.metric("Уникальных текстов", report["unique_text_count"])
-    c.metric("Размечено", report["annotation_count"])
-    d.metric("Повторы текста", f"{report['duplicate_text_rate']:.1%}")
-    left, right = st.columns(2)
-    with left:
-        counts = (
-            candidates.groupby("target_subtype").size().reset_index(name="count")
-        )
-        st.plotly_chart(
-            px.bar(counts, x="count", y="target_subtype", orientation="h"),
-            width="stretch",
-        )
-    with right:
-        labels = annotations.groupby("annotation").size().reset_index(name="count")
-        st.plotly_chart(
-            px.bar(labels, x="annotation", y="count"), width="stretch"
-        )
-    st.caption("Частоты относятся к строкам файла, а не к независимым диалогам.")
-    st.subheader("Данные набора")
-    st.metric("Всего записей в датасете", f"{total_count:,}".replace(",", " "))
-    subtype = st.selectbox("Фильтр по подвиду", ["Все"] + sorted(candidates["target_subtype"].unique()))
-    source_columns = sources[["source_id", "source_name", "platform", "url"]].rename(
-        columns={"url": "source_url"}
-    )
-    full_table = candidates.merge(
-        source_columns, on="source_id", how="left", validate="many_to_one"
-    )
-    table = full_table if subtype == "Все" else full_table[full_table["target_subtype"] == subtype]
-    st.caption(
-        f"В таблице: {len(table):,} из {total_count:,} записей. "
-        "Ограничения в 1 000 строк нет; выбранный фильтр меняет только таблицу."
-    )
-    st.download_button(
-        "Скачать все 13 500 записей CSV",
-        data=full_table.to_csv(index=False).encode("utf-8-sig"),
-        file_name="cyber_threat_dataset_13500.csv",
-        mime="text/csv",
-        type="primary",
-    )
-    st.dataframe(
-        table,
-        width="stretch",
-        height=760,
-        hide_index=True,
-    )
-
-elif page == "Качество и аудит":
-    if st.button("Пересчитать и сохранить аудит"):
-        subprocess.run([sys.executable, str(ROOT / "run.py")], cwd=ROOT, check=True)
-        st.success("Аудит обновлён")
-    st.metric("TARGET_THREAT", f"{report['target_threat_rate']:.1%}")
-    st.metric("UNCERTAIN", f"{report['uncertain_rate']:.1%}")
-    st.metric("Тексты, совпавшие с сырым снимком", report["raw_matching_text_count"])
-    st.metric("Тексты с разными языковыми метками", report["inconsistent_language_texts"])
-    if report["blocking_reasons"]:
-        st.error("Переход к следующему этапу запрещён:")
-        for reason in report["blocking_reasons"]:
-            st.write(f"• {reason}")
-    else:
-        st.success("Все настроенные проверки пройдены")
-    st.json(report)
+    a.metric("Unique rows after filters", f"{audit['usable_unique_rows_after_filters']:,}")
+    b.metric("Train / validation / test", " / ".join(
+        str(audit["split_counts_by_labels"][part]["rows"]) for part in ("train", "validation", "test")
+    ))
+    c.metric("Near-duplicate pairs in final pool", str(audit["near_duplicate_pairs_in_final_pool"]))
+    d.metric("Random seed", str(audit["random_seed"]))
+    rows = []
+    for model, results in metrics["models"].items():
+        for split in ("validation", "test"):
+            result = results[split]
+            rows.append({
+                "Model (scikit-learn ML)": model,
+                "Split": split,
+                "Macro F1": result["f1_macro"],
+                "F1 decent": result["class_metrics"]["decent"]["f1"],
+                "F1 obscene": result["class_metrics"]["obscene"]["f1"],
+                "N": result["n"],
+            })
+    frame = pd.DataFrame(rows)
+    st.subheader("Validation and held-out test metrics")
+    st.dataframe(frame.style.format({"Macro F1": "{:.3f}", "F1 decent": "{:.3f}", "F1 obscene": "{:.3f}"}), hide_index=True, width="stretch")
+    st.plotly_chart(px.bar(frame[frame["Split"] == "test"], x="Model (scikit-learn ML)", y="Macro F1", title="Held-out test macro F1"), width="stretch")
+    model = st.selectbox("Confusion matrix model", list(metrics["models"]))
+    split = st.radio("Confusion matrix split", ["validation", "test"], horizontal=True)
+    result = metrics["models"][model][split]
+    matrix = pd.DataFrame(result["confusion_matrix"], index=["true decent", "true obscene"], columns=["predicted decent", "predicted obscene"])
+    st.dataframe(matrix, width="stretch")
+    st.caption(f"Fit and predict time: {audit['total_elapsed_seconds']:.1f} seconds. No tuning used the held-out test split.")
+    with st.expander("Method and limitations"):
+        st.write("Read the audit JSON for package versions, preprocessing, split construction, and complete limitations. The corpus task is narrower than general toxicity. A small benchmark does not establish real-world performance.")
+        for item in audit["limitations"]:
+            st.write(f"- {item}")
 
 else:
-    metadata_path = ROOT / "10_model_baselines/evaluation_metadata.json"
-    scores_path = ROOT / "10_model_baselines/model_metrics.csv"
-    if not metadata_path.exists() or not scores_path.exists():
-        st.info("Метрики ещё не рассчитаны. Запустите train_models.py и опубликуйте результаты.")
-    else:
-        metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
-        scores = pd.read_csv(scores_path)
-        st.subheader("Пять открытых моделей: оценка от 0 до 5")
-        st.info(
-            f"Статус: {metadata['dataset_status']}. "
-            f"Всего уникальных размеченных текстов: {metadata['unique_labeled_texts']}; "
-            f"Обучающих уникальных текстов: {metadata['training_texts']}; "
-            f"тестовых: {metadata['test_texts']}."
-        )
-        st.caption(
-            "Все пять моделей — открытые алгоритмы scikit-learn, обученные локально "
-            "на этом наборе. Они не являются пятью внешними сервисами или "
-            "предобученными большими языковыми моделями."
-        )
-        st.dataframe(
-            scores,
-            width="stretch",
-            hide_index=True,
-            column_config={
-                "Открытый исходный код": st.column_config.LinkColumn(
-                    "Исходный код и документация"
-                ),
-            },
-        )
-        st.plotly_chart(
-            px.bar(
-                scores,
-                x="Model",
-                y="Оценка 0–5",
-                text="Оценка 0–5",
-                range_y=[0, 5],
-            ),
-            width="stretch",
-        )
-        st.caption(
-            "Оценка = F1 (%) / 20; равные F1 делят одно место. "
-            "Бинарная задача TARGET_THREAT против OTHER_THREAT и NORMAL; "
-            "UNCERTAIN исключены. "
-            "Метрики получены на отложенных уникальных текстах из текущего снимка; "
-            "шаблонное сходство и провал аудита не позволяют достоверно ранжировать "
-            "модели по работе на реальных новых источниках."
-        )
-        predictions_path = ROOT / "10_model_baselines/model_predictions.csv"
-        if predictions_path.exists():
-            predictions = load_csv("10_model_baselines/model_predictions.csv")
-            model_names = scores["Model"].tolist()
-            if len(predictions) == metadata.get("analyzed_dataset_rows") and all(
-                name in predictions.columns for name in model_names
-            ):
-                st.subheader("Анализ всех записей")
-                st.caption(
-                    "Каждая из пяти моделей обработала все строки датасета. "
-                    "Прогноз 1 означает TARGET_THREAT; это автоматическая оценка, "
-                    "а не ручная разметка или проверенный факт."
-                )
-                st.metric("Обработано каждой моделью", f"{len(predictions):,}".replace(",", " "))
-                summary = pd.DataFrame({
-                    "Модель": model_names,
-                    "Прогноз 1": [int(predictions[name].sum()) for name in model_names],
-                    "Прогноз 0": [int((predictions[name] == 0).sum()) for name in model_names],
-                })
-                st.dataframe(summary, width="stretch", hide_index=True)
-                candidates = load_csv("06_candidates/candidates.csv")
-                sources = load_csv("02_sources/sources_approved.csv")
-                enriched = candidates.merge(
-                    predictions.drop(columns="source_id"),
-                    on="dialogue_id",
-                    how="left",
-                    validate="one_to_one",
-                ).merge(
-                    sources[["source_id", "source_name", "platform", "url"]].rename(
-                        columns={"url": "source_url"}
-                    ),
-                    on="source_id",
-                    how="left",
-                    validate="many_to_one",
-                )
-                st.download_button(
-                    "Скачать все записи с прогнозами пяти моделей CSV",
-                    data=enriched.to_csv(index=False).encode("utf-8-sig"),
-                    file_name="cyber_threat_dataset_13500_five_model_predictions.csv",
-                    mime="text/csv",
-                )
-                selected_model = st.selectbox("Модель для анализа по каналам", model_names)
-                by_source = (
-                    enriched.groupby(["source_name", "platform"], dropna=False)
-                    .agg(Записей=("dialogue_id", "size"), Прогнозов_1=(selected_model, "sum"))
-                    .reset_index()
-                    .sort_values("Записей", ascending=False)
-                )
-                st.dataframe(by_source, width="stretch", hide_index=True)
+    status = read_json(ROOT / "analysis" / "target_corpus_status.json")
+    st.header("Requested harmful-influence corpus")
+    st.error(f"Verified relevant target messages: {status['verified_target_messages']} / {status['required_target_messages']}")
+    st.write(status["reason"])
+    st.info("The requested 13,500-message target corpus is unfinished. Separate source experiments and NORMAL comparison candidates do not count toward its harmful-influence subtypes.")
+    st.write("See `analysis/FINAL_AUDIT.md` for audited source decisions and the missing conditions for completion.")
+

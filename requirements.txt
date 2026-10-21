@@ -1,7 +1,7 @@
-pandas
-pyyaml
-pytest
-pydantic
-streamlit
-plotly
-scikit-learn
+pandas>=2.2,<4
+pyyaml>=6.0,<7
+pydantic>=2.7,<3
+streamlit>=1.52,<2
+plotly>=5.20,<7
+scikit-learn>=1.5,<2
+

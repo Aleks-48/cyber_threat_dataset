@@ -1,5 +1,15 @@
 __pycache__/
-*.pyc
+*.py[cod]
 .pytest_cache/
 venv/
+.venv/
 .env
+.env.*
+!.env.example
+analysis/external_sources/MCA_Russian_Toxic_Comments/raw/
+analysis/experiments/ru_obscene_ml/models/
+analysis/experiments/ru_obscene_ml/predictions.csv
+analysis/experiments/ru_obscene_ml/split_assignments.csv
+analysis/experiments/ru_obscene_ml/excluded_rows.csv
+analysis/experiments/ru_obscene_ml/near_duplicate_pairs.csv
+
