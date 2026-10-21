@@ -12,7 +12,7 @@ The requested 13,500 unique, relevant harmful-influence messages are **not compl
 - Task: predict the source's original `decent` / `obscene` labels.
 - Cleaned corpus: 3,700 unique rows after exact and near-duplicate filtering.
 - Train / validation / test: 2,241 / 728 / 731; test was held out before model selection.
-- Test macro F1: Logistic Regression 0.716; Multinomial Naive Bayes 0.488; LinearSVC 0.730; Random Forest 0.735; MLP 0.530. Per-class scores and confusion matrices are in [`analysis/experiments/ru_obscene_ml/metrics.json`](analysis/experiments/ru_obscene_ml/metrics.json).
+- Test macro F1: Logistic Regression 0.710; Multinomial Naive Bayes 0.489; LinearSVC 0.674; Random Forest 0.712; MLP 0.559. Per-class scores and confusion matrices are in [`analysis/experiments/ru_obscene_ml/metrics.json`](analysis/experiments/ru_obscene_ml/metrics.json).
 - Audit, source attribution, license details, seed, package versions, and limitations: [`analysis/experiments/ru_obscene_ml/audit.json`](analysis/experiments/ru_obscene_ml/audit.json) and [`analysis/external_sources/MCA_Russian_Toxic_Comments/source_manifest.json`](analysis/external_sources/MCA_Russian_Toxic_Comments/source_manifest.json).
 
 ## Run the dashboard locally
