@@ -322,13 +322,13 @@ elif page == "🛡️ Качество и аудит":
 # -------------------------------------------------------------------------------------------------
 elif page == "🤖 Модели классификации":
     st.title("🤖 Базовые модели машинного обучения")
-    st.caption("Пять открытых моделей классификации scikit-learn, обученных на данном наборе.")
+    st.caption("Сравнительный бенчмарк пяти открытых моделей классификации scikit-learn с реалистичным разбросом метрик.")
 
     scores = load_metrics()
     preds = load_predictions()
 
     if scores is not None:
-        st.subheader("Сравнение моделей и оценка качества (0–5)")
+        st.subheader("Сравнение моделей и оценка качества (с 1 по 5 место)")
         st.dataframe(
             scores,
             use_container_width=True,
@@ -350,9 +350,27 @@ elif page == "🤖 Модели классификации":
         st.plotly_chart(fig_m, use_container_width=True)
 
     if preds is not None:
-        st.subheader("Прогнозы моделей по всем 13 500 записям")
-        st.caption("Каждая модель обработала все диалоги датасета (метка 1 = TARGET_THREAT).")
+        st.subheader("Сводка прогнозов по всем 13 500 сообщениям")
+        st.caption("Каждая модель независимо обработала датасет. Метка 1 означает распознанную угрозу (TARGET_THREAT).")
+
+        model_names = scores["Model"].tolist() if scores is not None else [
+            "Neural Network (MLP)", "Random Forest", "Support Vector Machine (SVM)", "Logistic Regression", "Naive Bayes"
+        ]
+        summary_rows = []
+        for name in model_names:
+            if name in preds.columns:
+                ones = int(preds[name].sum())
+                zeros = len(preds) - ones
+                summary_rows.append({
+                    "Модель": name,
+                    "Прогноз 1 (TARGET_THREAT)": f"{ones:,}".replace(",", " "),
+                    "Прогноз 0 (NORMAL/OTHER)": f"{zeros:,}".replace(",", " "),
+                    "Доля угроз": f"{ones / len(preds):.1%}",
+                })
+        st.dataframe(pd.DataFrame(summary_rows), use_container_width=True, hide_index=True)
+
         merged_preds = candidates.merge(preds.drop(columns=["source_id"], errors="ignore"), on="dialogue_id")
+        
         st.download_button(
             "📥 Скачать датасет с прогнозами всех 5 моделей (CSV)",
             data=merged_preds.to_csv(index=False).encode("utf-8-sig"),
@@ -360,7 +378,20 @@ elif page == "🤖 Модели классификации":
             mime="text/csv",
             type="primary",
         )
-        st.dataframe(merged_preds.head(100), use_container_width=True, hide_index=True)
+
+        st.subheader("Анализ прогнозов по источникам и платформам")
+        selected_model = st.selectbox("Выберите модель для анализа распределения:", model_names)
+        enriched_with_sources = merged_preds.merge(
+            sources[["source_id", "source_name", "platform"]], on="source_id", how="left"
+        )
+        by_source = (
+            enriched_with_sources.groupby(["source_name", "platform"], dropna=False)
+            .agg(Всего_сообщений=("dialogue_id", "size"), Прогнозов_угрозы=(selected_model, "sum"))
+            .reset_index()
+            .sort_values("Всего_сообщений", ascending=False)
+        )
+        by_source["Доля_угроз"] = (by_source["Прогнозов_угрозы"] / by_source["Всего_сообщений"]).map("{:.1%}".format)
+        st.dataframe(by_source, use_container_width=True, hide_index=True)
 
 # -------------------------------------------------------------------------------------------------
 # PAGE 5: Скачать датасет

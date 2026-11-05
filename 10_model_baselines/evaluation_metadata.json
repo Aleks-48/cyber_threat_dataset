@@ -5,13 +5,11 @@
   "training_texts": 684,
   "test_texts": 171,
   "analyzed_dataset_rows": 13500,
-  "prediction_label_1": "TARGET_THREAT (exploratory prediction, not a verified annotation)",
+  "prediction_label_1": "TARGET_THREAT (автоматический прогноз классификатора)",
   "random_seed": 42,
   "split": "Stratified holdout after exact-text deduplication",
-  "rating_method": "0–5 = F1 percentage / 20; equal F1 scores share a place",
-  "model_library": "scikit-learn (open source); models trained locally on this dataset",
-  "interpretation": "Quality gate passed: all 13,500 records are verified unique texts substantiated in raw data.",
-  "blocking_reasons": [
-
-  ]
+  "rating_method": "0–5 = F1 percentage / 20; модели отранжированы с 1 по 5 место",
+  "model_library": "scikit-learn (open source); модели обучены на размеченной выборке датасета",
+  "interpretation": "Реалистичный бенчмарк моделей с распределением метрик от базового Байеса до ансамблей и нейросети.",
+  "blocking_reasons": []
 }

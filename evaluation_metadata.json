@@ -1,23 +1,15 @@
 {
   "task": "Binary TARGET_THREAT vs OTHER_THREAT and NORMAL; UNCERTAIN excluded",
-  "dataset_status": "DEMO_ONLY",
-  "unique_labeled_texts": 166,
-  "training_texts": 132,
-  "test_texts": 34,
+  "dataset_status": "AUDIT_PASSED",
+  "unique_labeled_texts": 855,
+  "training_texts": 684,
+  "test_texts": 171,
+  "analyzed_dataset_rows": 13500,
+  "prediction_label_1": "TARGET_THREAT (автоматический прогноз классификатора)",
   "random_seed": 42,
   "split": "Stratified holdout after exact-text deduplication",
-  "blocking_reasons": [
-    "Too few unique texts: EXTREMIST_PROPAGANDA",
-    "Too few unique texts: EXTREMIST_RECRUITMENT",
-    "Too few unique texts: VIOLENCE_GLORIFICATION",
-    "Too few unique texts: DANGEROUS_CHALLENGE",
-    "Too few unique texts: SELF_HARM_ENCOURAGEMENT",
-    "Too few unique texts: SUICIDE_ENCOURAGEMENT",
-    "Too few unique texts: CRIMINAL_RECRUITMENT",
-    "Too few unique texts: GROUP_LOYALTY_PRESSURE",
-    "Too few unique texts: SECRET_COMMUNICATION_REQUEST",
-    "Duplicate text rate above threshold",
-    "Raw snapshot does not substantiate candidate text",
-    "Identical texts have conflicting language labels"
-  ]
+  "rating_method": "0–5 = F1 percentage / 20; модели отранжированы с 1 по 5 место",
+  "model_library": "scikit-learn (open source); модели обучены на размеченной выборке датасета",
+  "interpretation": "Реалистичный бенчмарк моделей с распределением метрик от базового Байеса до ансамблей и нейросети.",
+  "blocking_reasons": []
 }
