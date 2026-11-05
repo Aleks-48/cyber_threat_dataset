@@ -1,8 +1,8 @@
 {
-    "random_seed": 42,
-    "parser_version": "1.0.0",
-    "timestamp": "2026-09-10T18:00:00Z",
-    "raw_data_hash": "8e632070cbd39c2ee08e6dde0b325c89e8c9c8b9718aca061752fa5649c48086",
-    "keywords_hash": "dummy",
-    "sources_hash": "dummy"
+  "random_seed": 42,
+  "parser_version": "1.0.0",
+  "timestamp": "2026-11-03T12:00:00Z",
+  "raw_data_hash": "3e3e710953b52684ad6e6d1ffa6bc88505b8aeb3c7731379ddedda37810f8709",
+  "keywords_hash": "dd92023414fd9f3e9bdd651d7756e1ba216ca42618f95ed64ab7383eeaa2edd7",
+  "sources_hash": "eefc70f9657f3c47049bbcb50062a59688a2189b012899d0ad067b302e07f095"
 }

@@ -1,4 +1,45 @@
 {
-    "next_stage_allowed": true,
-    "blocking_reasons": []
+  "approved_keywords": 33,
+  "approved_sources": 44,
+  "candidate_count": 13500,
+  "candidate_counts_by_subtype": {
+    "EXTREMIST_PROPAGANDA": 1500,
+    "EXTREMIST_RECRUITMENT": 1500,
+    "VIOLENCE_GLORIFICATION": 1500,
+    "DANGEROUS_CHALLENGE": 1500,
+    "SELF_HARM_ENCOURAGEMENT": 1500,
+    "SUICIDE_ENCOURAGEMENT": 1500,
+    "CRIMINAL_RECRUITMENT": 1500,
+    "GROUP_LOYALTY_PRESSURE": 1500,
+    "SECRET_COMMUNICATION_REQUEST": 1500
+  },
+  "unique_text_count": 13500,
+  "unique_texts_by_subtype": {
+    "EXTREMIST_PROPAGANDA": 1500,
+    "EXTREMIST_RECRUITMENT": 1500,
+    "VIOLENCE_GLORIFICATION": 1500,
+    "DANGEROUS_CHALLENGE": 1500,
+    "SELF_HARM_ENCOURAGEMENT": 1500,
+    "SUICIDE_ENCOURAGEMENT": 1500,
+    "CRIMINAL_RECRUITMENT": 1500,
+    "GROUP_LOYALTY_PRESSURE": 1500,
+    "SECRET_COMMUNICATION_REQUEST": 1500
+  },
+  "duplicate_text_rate": 0.0,
+  "sample_count": 900,
+  "annotation_count": 900,
+  "annotation_counts": {
+    "OTHER_THREAT": 108,
+    "TARGET_THREAT": 666,
+    "NORMAL": 81,
+    "UNCERTAIN": 45
+  },
+  "target_threat_rate": 0.74,
+  "uncertain_rate": 0.05,
+  "raw_matching_text_count": 13500,
+  "inconsistent_language_texts": 0,
+  "next_stage_allowed": true,
+  "blocking_reasons": [
+
+  ]
 }
