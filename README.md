@@ -1,6 +1,6 @@
 # Cyber Threat Dataset (Theme 8: HARMFUL_INFLUENCE)
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://github.com/Aleks-48/cyber_threat_dataset)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://cyberthreatdataset-cxgqds78wopgau9kkchtks.streamlit.app/)
 [![Dataset Release](https://img.shields.io/badge/Release-v1.0.0-blue.svg)](https://github.com/Aleks-48/cyber_threat_dataset/releases/tag/v1.0.0)
 [![Audit Status](https://img.shields.io/badge/Audit-PASSED-brightgreen.svg)](09_verdict/stage_verdict.json)
 [![License](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
